@@ -116,6 +116,11 @@ Pointer<T,size>::Pointer(const Pointer &ob){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
+    std::cout << "In copy constructor\n";
+    typename std::list<PtrDetails<T>>::iterator p;
+    p = findPtrInfo(addr);
+
+    addr = ob->addr;
 
 }
 
@@ -144,7 +149,20 @@ T *Pointer<T, size>::operator=(T *t){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
+    std::cout << "In operator=(T *t)\n";
+    typename std::list<PtrDetails<T>>::iterator p;
+    p = findPtrInfo(addr);
+    // First, decrement the reference count
+    // for the memory currently being pointed to.
+    p->refcount--;
 
+    // Then, increment the reference count of
+    // the new address.
+    p = findPtrInfo(t);
+    p->refcount++;
+    // store the address.
+    addr = t;
+    return t;
 }
 // Overload assignment of Pointer to Pointer.
 template <class T, int size>
@@ -152,7 +170,20 @@ Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
+    std::cout << "In operator=(Pointer &rv)\n";
+    typename std::list<PtrDetails<T>>::iterator p;
+    p = findPtrInfo(addr);
+    // First, decrement the reference count
+    // for the memory currently being pointed to.
+    p->refcount--;
 
+    // Then, increment the reference count of
+    // the new address.
+    p = findPtrInfo(rv.addr);
+    p->refcount++;
+    // store the address.
+    addr = rv.addr;
+    return rv;
 }
 
 // A utility function that displays refContainer.
