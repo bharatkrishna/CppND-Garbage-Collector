@@ -101,6 +101,9 @@ bool Pointer<T, size>::first = true;
 // Constructor for both initialized and uninitialized objects. -> see class interface
 template<class T,int size>
 Pointer<T,size>::Pointer(T *t){
+#ifdef DEBUG
+    std::cout << "In copy constructor Pointer(T *t)\n";
+#endif
     // Register shutdown() as an exit function.
     if (first)
         atexit(shutdown);
@@ -108,7 +111,19 @@ Pointer<T,size>::Pointer(T *t){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
-
+    typename std::list<PtrDetails<T>>::iterator p;
+    p = findPtrInfo(t);
+    // increment ref count
+    p->refcount++;
+    addr = t;
+    arraySize = size;
+    // decide whether it is an array
+    if (arraySize > 0) isArray = true;
+    else isArray = false;
+#ifdef DEBUG
+    std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n";
+#endif
 }
 // Copy constructor.
 template< class T, int size>
@@ -117,7 +132,7 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
 #ifdef DEBUG
-    std::cout << "In copy constructor\n";
+    std::cout << "In copy constructor Pointer(const Pointer &ob)\n";
 #endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
@@ -126,15 +141,12 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     addr = ob.addr;
     arraySize = ob.arraySize;
     // decide whether it is an array
-    if (arraySize > 0) {
-        isArray = true;
-    } else {
-        isArray = false;
-    }
+    if (arraySize > 0) isArray = true;
+    else isArray = false;
 
 #ifdef DEBUG
-    std::cout << "Array size: " << arraySize << "\n";
-    std::cout << "Is Array: " << isArray << "\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n";
 #endif
 }
 

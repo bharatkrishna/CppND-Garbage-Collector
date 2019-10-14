@@ -17,7 +17,8 @@ int main()
     Pointer<int> p2(p1);
 
     // Test Array creation
-    // Pointer<int, 3> arr_p = new int[3];
+    Pointer<int, 3> arr_p1 = new int[3];
+    Pointer<int, 3> arr_p2(arr_p1);
 
     return 0;
 }
