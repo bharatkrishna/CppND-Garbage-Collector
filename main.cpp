@@ -8,13 +8,16 @@ int main()
     p = new int(21);
     p = new int(28);
 
+    // Test operator=(T &rv)
+    Pointer<int> p3;
+    p3 = p;
+
     // Test Copy Constructor
     Pointer<int> p1 = new int(19);
     Pointer<int> p2(p1);
 
-    // Test operator=(T &rv)
-    Pointer<int> p3;
-    p3 = p2;
+    // Test Array creation
+    // Pointer<int, 3> arr_p = new int[3];
 
     return 0;
 }

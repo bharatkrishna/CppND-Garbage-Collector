@@ -116,12 +116,26 @@ Pointer<T,size>::Pointer(const Pointer &ob){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
+#ifdef DEBUG
     std::cout << "In copy constructor\n";
+#endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
+    // increment ref count
+    p->refcount++;
+    addr = ob.addr;
+    arraySize = ob.arraySize;
+    // decide whether it is an array
+    if (arraySize > 0) {
+        isArray = true;
+    } else {
+        isArray = false;
+    }
 
-    addr = ob->addr;
-
+#ifdef DEBUG
+    std::cout << "Array size: " << arraySize << "\n";
+    std::cout << "Is Array: " << isArray << "\n";
+#endif
 }
 
 // Destructor for Pointer.
@@ -140,7 +154,25 @@ bool Pointer<T, size>::collect(){
     // TODO: Implement collect function
     // LAB: New and Delete Project Lab
     // Note: collect() will be called in the destructor
-    return false;
+    bool memfreed = false;
+    typename std::list<PtrDetails<T>>::iterator p;
+    do
+    {
+        // Scan refContainer looking for unreferenced pointers.
+        for (p = refContainer.begin(); p != refContainer.end(); p++)
+        {
+            // TODO: Implement collect()
+            // If in-use, skip.
+
+            // Remove unused entry from refContainer.
+
+            // Free memory unless the Pointer is null.
+
+            // Restart the search.
+            break;
+        }
+    } while (p != refContainer.end());
+    return memfreed;
 }
 
 // Overload assignment of pointer to Pointer.
@@ -149,7 +181,9 @@ T *Pointer<T, size>::operator=(T *t){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
+#ifdef DEBUG
     std::cout << "In operator=(T *t)\n";
+#endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
     // First, decrement the reference count
@@ -170,7 +204,9 @@ Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
+#ifdef DEBUG
     std::cout << "In operator=(Pointer &rv)\n";
+#endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
     // First, decrement the reference count
