@@ -102,7 +102,7 @@ bool Pointer<T, size>::first = true;
 template<class T,int size>
 Pointer<T,size>::Pointer(T *t){
 #ifdef DEBUG
-    std::cout << "In copy constructor Pointer(T *t)\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(T *t)\n";
 #endif
     // Register shutdown() as an exit function.
     if (first)
@@ -114,7 +114,12 @@ Pointer<T,size>::Pointer(T *t){
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(t);
     // increment ref count
-    p->refcount++;
+    if (p!= refContainer.end()) {
+        p->refcount++;
+    } else {
+        // PtrDetails<T> ptrDetails;
+        // refContainer.emplace_back(ptrDetails);
+    }
     addr = t;
     arraySize = size;
     // decide whether it is an array
@@ -132,7 +137,7 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
 #ifdef DEBUG
-    std::cout << "In copy constructor Pointer(const Pointer &ob)\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(const Pointer &ob)\n";
 #endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
@@ -156,6 +161,12 @@ Pointer<T, size>::~Pointer(){
 
     // TODO: Implement Pointer destructor
     // Lab: New and Delete Project Lab
+    typename std::list<PtrDetails<T>>::iterator p;
+    p = findPtrInfo(addr);
+    std::cout << __FILE__ << ":" << __LINE__ << " refcount before: " << p->refcount << "\n";
+    if(p->refcount > 0) p->refcount--;
+    std::cout << __FILE__ << ":" << __LINE__ << " refcount after: " << p->refcount << "\n";
+    collect();
 }
 
 // Collect garbage. Returns true if at least
@@ -175,10 +186,14 @@ bool Pointer<T, size>::collect(){
         {
             // TODO: Implement collect()
             // If in-use, skip.
-
-            // Remove unused entry from refContainer.
-
-            // Free memory unless the Pointer is null.
+            if (p->refcount == 0 && p->memPtr == NULL)
+            {
+                // Remove unused entry from refContainer.
+                refContainer.remove(*p);
+                // Free memory unless the Pointer is null.
+                delete p->memPtr;
+                memfreed = true;
+            }
 
             // Restart the search.
             break;
@@ -194,7 +209,7 @@ T *Pointer<T, size>::operator=(T *t){
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
 #ifdef DEBUG
-    std::cout << "In operator=(T *t)\n";
+    std::cout << __FILE__ << ":" << __LINE__ << " In operator=(T *t)\n";
 #endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
@@ -217,7 +232,7 @@ Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
 #ifdef DEBUG
-    std::cout << "In operator=(Pointer &rv)\n";
+    sstd::cout << __FILE__ << ":" << __LINE__ << " In operator=(Pointer &rv)\n";
 #endif
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);

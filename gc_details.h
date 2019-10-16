@@ -21,9 +21,10 @@ array, then arraySize contains its size */
     PtrDetails(void)
     {
         // TODO: Implement PtrDetails
-        std::cout << "In PtrDetails; arraySize: " << arraySize << "\n";
-        if (arraySize > 0) isArray = true;
-        else isArray = false;
+        // refcount = 1;
+        // std::cout << "In PtrDetails; arraySize: " << arraySize << "\n";
+        // if (arraySize > 0) isArray = true;
+        // else isArray = false;
     }
 };
 // Overloading operator== allows two class objects to be compared.
