@@ -20,5 +20,9 @@ int main()
     Pointer<int, 3> arr_p1 = new int[3];
     Pointer<int, 3> arr_p2(arr_p1);
 
+    // Test Copy Constructor for Array
+    Pointer<double, 5>  arr_p3 = new double[5];
+    Pointer<double, 5> arr_p4(arr_p3);
+
     return 0;
 }

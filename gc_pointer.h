@@ -4,6 +4,14 @@
 #include <cstdlib>
 #include "gc_details.h"
 #include "gc_iterator.h"
+
+// Macro for printf debugging
+#ifdef DEBUG
+#define DEBUG_PRINT(x) x 
+#else 
+#define DEBUG_PRINT(x)
+#endif
+
 /*
     Pointer implements a pointer type that uses
     garbage collection to release unused memory.
@@ -101,9 +109,7 @@ bool Pointer<T, size>::first = true;
 // Constructor for both initialized and uninitialized objects. -> see class interface
 template<class T,int size>
 Pointer<T,size>::Pointer(T *t){
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(T *t)\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(T *t)\n");
     // Register shutdown() as an exit function.
     if (first)
         atexit(shutdown);
@@ -113,22 +119,24 @@ Pointer<T,size>::Pointer(T *t){
     // Lab: Smart Pointer Project Lab
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(t);
-    // increment ref count
-    if (p!= refContainer.end()) {
+    // increment ref count, if t is in list
+    if (p != refContainer.end()) {
         p->refcount++;
     } else {
-        // PtrDetails<T> ptrDetails;
-        // refContainer.emplace_back(ptrDetails);
+        // add a new entry to the list  
+        PtrDetails<T> ptrDetails(t, size);
+        refContainer.emplace_back(ptrDetails);
     }
     addr = t;
     arraySize = size;
     // decide whether it is an array
     if (arraySize > 0) isArray = true;
     else isArray = false;
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n";
-    std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Mem address: " << t << "\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " refcount: " << p->refcount << "\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n");
+    DEBUG_PRINT(std::cout << "------------\n");
 }
 // Copy constructor.
 template< class T, int size>
@@ -136,9 +144,7 @@ Pointer<T,size>::Pointer(const Pointer &ob){
 
     // TODO: Implement Pointer constructor
     // Lab: Smart Pointer Project Lab
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(const Pointer &ob)\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In copy constructor Pointer(const Pointer &ob)\n");
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
     // increment ref count
@@ -149,10 +155,9 @@ Pointer<T,size>::Pointer(const Pointer &ob){
     if (arraySize > 0) isArray = true;
     else isArray = false;
 
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n";
-    std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Array size: " << arraySize << "\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Is Array: " << isArray << "\n");
+    DEBUG_PRINT(std::cout << "------------\n");
 }
 
 // Destructor for Pointer.
@@ -161,11 +166,15 @@ Pointer<T, size>::~Pointer(){
 
     // TODO: Implement Pointer destructor
     // Lab: New and Delete Project Lab
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In ~Pointer()\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Mem address: " << addr << "\n");
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
-    std::cout << __FILE__ << ":" << __LINE__ << " refcount before: " << p->refcount << "\n";
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " refcount before: " << p->refcount << "\n");
     if(p->refcount > 0) p->refcount--;
-    std::cout << __FILE__ << ":" << __LINE__ << " refcount after: " << p->refcount << "\n";
+    
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " refcount after: " << p->refcount << "\n");
+    DEBUG_PRINT(std::cout << "------------\n");
     collect();
 }
 
@@ -177,6 +186,7 @@ bool Pointer<T, size>::collect(){
     // TODO: Implement collect function
     // LAB: New and Delete Project Lab
     // Note: collect() will be called in the destructor
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In collect()\n");
     bool memfreed = false;
     typename std::list<PtrDetails<T>>::iterator p;
     do
@@ -185,20 +195,20 @@ bool Pointer<T, size>::collect(){
         for (p = refContainer.begin(); p != refContainer.end(); p++)
         {
             // TODO: Implement collect()
-            // If in-use, skip.
-            if (p->refcount == 0 && p->memPtr == NULL)
-            {
-                // Remove unused entry from refContainer.
-                refContainer.remove(*p);
-                // Free memory unless the Pointer is null.
-                delete p->memPtr;
-                memfreed = true;
+            // Remove unused entry from refContainer.
+            DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Mem address to remove: " << p->memPtr << "\n");
+            refContainer.remove(*p);
+            // Free memory unless the Pointer is null.
+            if (p->memPtr) {
+                if (p->isArray) delete[] p->memPtr;
+                else delete p->memPtr;
             }
-
+            memfreed = true;
             // Restart the search.
             break;
         }
     } while (p != refContainer.end());
+    DEBUG_PRINT(std::cout << "------------\n");
     return memfreed;
 }
 
@@ -208,9 +218,8 @@ T *Pointer<T, size>::operator=(T *t){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
-#ifdef DEBUG
-    std::cout << __FILE__ << ":" << __LINE__ << " In operator=(T *t)\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In operator=(T *t)\n");
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " Mem address: " << t << "\n");
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
     // First, decrement the reference count
@@ -220,9 +229,17 @@ T *Pointer<T, size>::operator=(T *t){
     // Then, increment the reference count of
     // the new address.
     p = findPtrInfo(t);
-    p->refcount++;
+    // increment ref count, if t is in list
+    if (p != refContainer.end()) {
+        p->refcount++;
+    } else {
+        // add a new entry to the list  
+        PtrDetails<T> ptrDetails(t, size);
+        refContainer.emplace_back(ptrDetails);
+    }
     // store the address.
     addr = t;
+    DEBUG_PRINT(std::cout << "------------\n");
     return t;
 }
 // Overload assignment of Pointer to Pointer.
@@ -231,9 +248,7 @@ Pointer<T, size> &Pointer<T, size>::operator=(Pointer &rv){
 
     // TODO: Implement operator==
     // LAB: Smart Pointer Project Lab
-#ifdef DEBUG
-    sstd::cout << __FILE__ << ":" << __LINE__ << " In operator=(Pointer &rv)\n";
-#endif
+    DEBUG_PRINT(std::cout << __FILE__ << ":" << __LINE__ << " In operator=(Pointer &rv)\n");
     typename std::list<PtrDetails<T>>::iterator p;
     p = findPtrInfo(addr);
     // First, decrement the reference count

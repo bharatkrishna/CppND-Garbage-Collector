@@ -21,10 +21,19 @@ array, then arraySize contains its size */
     PtrDetails(void)
     {
         // TODO: Implement PtrDetails
-        // refcount = 1;
-        // std::cout << "In PtrDetails; arraySize: " << arraySize << "\n";
-        // if (arraySize > 0) isArray = true;
-        // else isArray = false;
+    }
+
+    // Implementing a constructor which takes arguments
+    // as we'd need this to create PtrDetails objects
+    // to be added to the refContainer list
+    PtrDetails(T *t, unsigned arraySize) : refcount(1), memPtr(t), arraySize(arraySize)
+    {
+        if (arraySize > 0) isArray = true;
+        else isArray = false;
+
+#ifdef DEBUG
+        std::cout << __FILE__ << ":" << __LINE__ << " Mem address: " << memPtr << "\n";
+#endif
     }
 };
 // Overloading operator== allows two class objects to be compared.
